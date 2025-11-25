@@ -11,6 +11,7 @@ import { dirname, join } from 'path';
 import { init } from './commands/init.js';
 import { check } from './commands/check.js';
 import { version as versionCmd } from './commands/version.js';
+import { checkPrerequisites } from './commands/check-prerequisites.js';
 import { showBanner } from './lib/ui/banner.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -56,6 +57,15 @@ program
   .command('version')
   .description('Display version and system information')
   .action(versionCmd);
+
+program
+  .command('check-prerequisites')
+  .description('Check prerequisites for Spec-Driven Development workflow')
+  .option('--json', 'Output in JSON format')
+  .option('--require-tasks', 'Require tasks.md to exist (for implementation phase)')
+  .option('--include-tasks', 'Include tasks.md in AVAILABLE_DOCS list')
+  .option('--paths-only', 'Only output path variables (no validation)')
+  .action(checkPrerequisites);
 
 // Show banner when no command provided
 if (process.argv.length <= 2) {

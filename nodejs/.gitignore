@@ -26,3 +26,7 @@ npm-debug.log*
 
 # Test artifacts
 .vitest-cache/
+
+# Include lib folders (exceptions to default ignores)
+!src/lib/
+!tests/lib/
