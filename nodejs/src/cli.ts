@@ -12,6 +12,7 @@ import { init } from './commands/init.js';
 import { check } from './commands/check.js';
 import { version as versionCmd } from './commands/version.js';
 import { checkPrerequisites } from './commands/check-prerequisites.js';
+import { setupPlan } from './commands/setup-plan.js';
 import { showBanner } from './lib/ui/banner.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -66,6 +67,12 @@ program
   .option('--include-tasks', 'Include tasks.md in AVAILABLE_DOCS list')
   .option('--paths-only', 'Only output path variables (no validation)')
   .action(checkPrerequisites);
+
+program
+  .command('setup-plan')
+  .description('Set up the plan.md file for a feature by copying the plan template')
+  .option('--json', 'Output in JSON format')
+  .action(setupPlan);
 
 // Show banner when no command provided
 if (process.argv.length <= 2) {
