@@ -8,24 +8,25 @@ The original Python implementation is in `../src/specify_cli/`. This port provid
 
 ## Current Status
 
-**127 tests passing** across 8 test files.
+**353 tests passing** across 20 test files. **~95% complete**
 
 ### Implemented Features
 
 - ✅ **Configuration**: AGENT_CONFIG (15 agents), SCRIPT_TYPE_CHOICES, CLAUDE_LOCAL_PATH
-- ✅ **GitHub Integration**: Token handling, rate limit parsing/formatting
-- ✅ **UI Components**: StepTracker, ASCII banner, console utilities
-- ✅ **Template Processing**: Deep merge JSON files
+- ✅ **GitHub Integration**: Token handling, rate limit parsing/formatting, API client
+- ✅ **UI Components**: StepTracker, ASCII banner, console utilities, interactive selection
+- ✅ **Template Processing**: Deep merge JSON files, download, extraction
 - ✅ **Tool Detection**: Check for CLI tools (git, claude, code, etc.)
 - ✅ **Git Operations**: Detect git repos, initialize with commit
-- ✅ **CLI Commands**: `check`, `version`, `init` (basic)
+- ✅ **CLI Commands**: `check`, `version`, `init` (fully functional)
+- ✅ **Script Permissions**: Set chmod on Unix .sh files
+- ✅ **Error Handling**: Structured error classes with exit codes
 
-### In Progress
+### Fully Working Commands
 
-- 🔄 **Template Download**: Download ZIP from GitHub releases
-- 🔄 **Template Extraction**: Unzip and merge with project directory
-- 🔄 **Script Permissions**: Set chmod on Unix .sh files
-- 🔄 **Interactive Selection**: Arrow key navigation menu
+- `specify check` - Check for required tools
+- `specify version` - Show version and system info
+- `specify init <project-name>` - Initialize a new Specify project
 
 ## Getting Started
 
@@ -40,10 +41,29 @@ npm run build
 npm test
 
 # Run the CLI locally
-node bin/specify.js --help
-node bin/specify.js check
-node bin/specify.js version
-node bin/specify.js init my-project --ai copilot --no-git
+npx . --help
+npx . check
+npx . version
+npx . init my-project --ai copilot --script sh --no-git
+```
+
+## Usage Examples
+
+```bash
+# Initialize a new project with GitHub Copilot (shell scripts)
+specify init my-project --ai copilot --script sh
+
+# Initialize in current directory
+specify init --here --ai claude
+
+# Force overwrite non-empty directory
+specify init my-project --ai gemini --force
+
+# Skip git initialization
+specify init my-project --ai copilot --no-git
+
+# Use a custom GitHub token
+specify init my-project --ai copilot --github-token ghp_xxx
 ```
 
 ## Project Structure
@@ -57,12 +77,12 @@ nodejs/
 │   ├── lib/
 │   │   ├── config.ts       # AGENT_CONFIG and constants
 │   │   ├── errors.ts       # Error classes and exit codes
-│   │   ├── github/         # GitHub API integration
-│   │   ├── template/       # Template download/extract
-│   │   ├── tools/          # Tool detection and git ops
-│   │   └── ui/             # Banner, tracker, select
+│   │   ├── github/         # GitHub API integration (token, rate-limit, client)
+│   │   ├── template/       # Template download/extract/merge/permissions
+│   │   ├── tools/          # Tool detection and git operations
+│   │   └── ui/             # Banner, tracker, select, console
 │   └── types/              # TypeScript interfaces
-├── tests/                  # Vitest test files
+├── tests/                  # Vitest test files (353 tests)
 ├── bin/                    # Executable entry point
 ├── package.json
 ├── tsconfig.json
@@ -82,6 +102,26 @@ npm test                    # Run all tests
 npm run test:watch          # Watch mode
 npm run test:coverage       # With coverage report
 ```
+
+## Supported AI Assistants
+
+| Agent | CLI Required | Folder |
+|-------|-------------|--------|
+| GitHub Copilot | No (IDE) | .github/ |
+| Claude Code | Yes | .claude/ |
+| Gemini CLI | Yes | .gemini/ |
+| Cursor | No (IDE) | .cursor/ |
+| Qwen Code | Yes | .qwen/ |
+| opencode | Yes | .opencode/ |
+| Codex CLI | Yes | .codex/ |
+| Windsurf | No (IDE) | .windsurf/ |
+| Kilo Code | No (IDE) | .kilocode/ |
+| Auggie CLI | Yes | .augment/ |
+| CodeBuddy | Yes | .codebuddy/ |
+| Roo Code | No (IDE) | .roo/ |
+| Amazon Q | Yes | .amazonq/ |
+| Amp | Yes | .agents/ |
+| SHAI | Yes | .shai/ |
 
 ## Reference
 

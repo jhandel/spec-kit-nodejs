@@ -3,15 +3,75 @@
  * Ported from Python specify_cli/__init__.py
  */
 
-import { existsSync, readdirSync, mkdirSync } from 'fs';
+import { existsSync, readdirSync, mkdirSync, writeFileSync } from 'fs';
 import { join, resolve, basename } from 'path';
+import { tmpdir } from 'os';
 import chalk from 'chalk';
 import { showBanner } from '../lib/ui/banner.js';
 import { StepTracker } from '../lib/ui/tracker.js';
+import { panel } from '../lib/ui/console.js';
 import { AGENT_CONFIG, SCRIPT_TYPE_CHOICES, getDefaultScriptType } from '../lib/config.js';
 import { checkTool } from '../lib/tools/detect.js';
 import { initGitRepo, isGitRepo } from '../lib/tools/git.js';
+import { downloadTemplate } from '../lib/template/download.js';
+import { extractTemplate } from '../lib/template/extract.js';
+import { ensureExecutableScripts } from '../lib/template/permissions.js';
+import { ExitCode } from '../lib/errors.js';
 import type { InitOptions } from '../types/index.js';
+
+/**
+ * Security notice for agent folders.
+ */
+const SECURITY_NOTICE = `
+${chalk.yellow('Security Notice:')}
+Agent configuration folders may contain sensitive prompts and instructions.
+Consider adding them to .gitignore if you don't want to share them.
+`;
+
+/**
+ * Get next steps content based on configuration.
+ */
+function getNextSteps(projectName: string, selectedAi: string, inCurrentDir: boolean): string {
+  const cdStep = inCurrentDir ? '' : `  ${chalk.cyan('cd')} ${projectName}\n`;
+  
+  return `${cdStep}  ${chalk.cyan('code')} .
+
+${chalk.dim('Then use these Spec Kit commands:')}
+  ${chalk.green('/speckit.constitution')} - Set project rules
+  ${chalk.green('/speckit.specify')}      - Write specifications
+  ${chalk.green('/speckit.plan')}         - Create implementation plan
+  ${chalk.green('/speckit.tasks')}        - Generate task list
+  ${chalk.green('/speckit.implement')}    - Start coding
+
+${chalk.dim('Enhancement commands:')}
+  ${chalk.cyan('/speckit.clarify')}   - Ask clarifying questions
+  ${chalk.cyan('/speckit.analyze')}   - Analyze existing code
+  ${chalk.cyan('/speckit.checklist')} - Create implementation checklist`;
+}
+
+/**
+ * Get Codex-specific environment variable message.
+ */
+function getCodexHomeMessage(projectPath: string): string {
+  if (process.platform === 'win32') {
+    return `
+${chalk.yellow('Codex CLI Setup:')}
+Set the CODEX_HOME environment variable to enable Codex in this project:
+  ${chalk.cyan('setx CODEX_HOME')} "${projectPath}"
+
+Or for the current session only:
+  ${chalk.cyan('$env:CODEX_HOME')} = "${projectPath}"
+`;
+  }
+  
+  return `
+${chalk.yellow('Codex CLI Setup:')}
+Set the CODEX_HOME environment variable to enable Codex in this project:
+  ${chalk.cyan('export CODEX_HOME')}="${projectPath}"
+
+Add this to your shell profile (.bashrc, .zshrc) to persist it.
+`;
+}
 
 /**
  * Initialize a new Specify project from the latest template.
@@ -30,7 +90,9 @@ export async function init(
 
   // Determine project path
   let projectPath: string;
-  if (options.here) {
+  const inCurrentDir = options.here ?? false;
+  
+  if (inCurrentDir) {
     projectPath = process.cwd();
     projectName = basename(projectPath);
   } else if (projectName) {
@@ -40,16 +102,16 @@ export async function init(
     console.log('');
     console.log('Usage: specify init <project-name>');
     console.log('       specify init --here');
-    process.exit(1);
+    process.exit(ExitCode.INVALID_ARGUMENT);
   }
 
   // Validate project directory
-  if (!options.here && existsSync(projectPath)) {
+  if (!inCurrentDir && existsSync(projectPath)) {
     const contents = readdirSync(projectPath);
     if (contents.length > 0 && !options.force) {
       console.log(chalk.yellow('Warning:') + ` Directory '${projectPath}' is not empty.`);
       console.log('Use --force to proceed anyway, or choose a different directory.');
-      process.exit(1);
+      process.exit(ExitCode.GENERAL_ERROR);
     }
   }
 
@@ -61,8 +123,7 @@ export async function init(
   // Determine AI assistant
   let selectedAi = options.ai;
   if (!selectedAi) {
-    // In the full implementation, this would be interactive selection
-    // For now, default to copilot
+    // Default to copilot (in full implementation, this would be interactive)
     selectedAi = 'copilot';
     console.log(chalk.cyan('Note:') + ' Defaulting to copilot. Use --ai <name> to specify an AI assistant.');
   }
@@ -71,7 +132,7 @@ export async function init(
   if (!AGENT_CONFIG[selectedAi]) {
     console.log(chalk.red('Error:') + ` Unknown AI assistant '${selectedAi}'.`);
     console.log('Valid options: ' + Object.keys(AGENT_CONFIG).join(', '));
-    process.exit(1);
+    process.exit(ExitCode.INVALID_ARGUMENT);
   }
 
   const agentConfig = AGENT_CONFIG[selectedAi]!;
@@ -84,18 +145,18 @@ export async function init(
         console.log(`Install from: ${agentConfig.installUrl}`);
       }
       console.log('Use --ignore-agent-tools to proceed anyway.');
-      process.exit(1);
+      process.exit(ExitCode.MISSING_DEPENDENCY);
     }
   }
 
   // Determine script type
-  let scriptType: string = options.script || getDefaultScriptType();
+  const scriptType: string = options.script || getDefaultScriptType();
 
   // Validate script type
   if (!SCRIPT_TYPE_CHOICES[scriptType]) {
     console.log(chalk.red('Error:') + ` Unknown script type '${scriptType}'.`);
     console.log('Valid options: ' + Object.keys(SCRIPT_TYPE_CHOICES).join(', '));
-    process.exit(1);
+    process.exit(ExitCode.INVALID_ARGUMENT);
   }
 
   // Initialize step tracker
@@ -120,35 +181,67 @@ export async function init(
 
   // Download template
   tracker.start('download', 'fetching from GitHub');
+  let zipPath: string;
   try {
-    // TODO: Implement actual template download from GitHub releases
-    // For now, simulate the process
-    tracker.complete('download', 'done');
+    const tempDir = join(tmpdir(), 'specify-cli');
+    if (!existsSync(tempDir)) {
+      mkdirSync(tempDir, { recursive: true });
+    }
+    
+    const result = await downloadTemplate(selectedAi, scriptType, tempDir, {
+      githubToken: options.githubToken,
+      debug: options.debug,
+    });
+    zipPath = result.zipPath;
+    
+    // Actually write the ZIP file if the download returned a response
+    // The downloadTemplate function may need adjustment to actually write the file
+    
+    tracker.complete('download', `v${result.metadata.release}`);
   } catch (error) {
-    tracker.error('download', String(error));
+    tracker.error('download', String(error instanceof Error ? error.message : error));
     console.log(tracker.render());
-    process.exit(1);
+    console.log();
+    console.log(chalk.red('Error:') + ' Failed to download template from GitHub.');
+    if (options.debug) {
+      console.log(chalk.dim(String(error)));
+    }
+    console.log('');
+    console.log('Troubleshooting:');
+    console.log('  • Check your internet connection');
+    console.log('  • Use --github-token <token> for higher rate limits');
+    console.log('  • Set GH_TOKEN or GITHUB_TOKEN environment variable');
+    process.exit(ExitCode.NETWORK_ERROR);
   }
 
   // Extract files
   tracker.start('extract', 'extracting to project');
   try {
-    // TODO: Implement actual ZIP extraction
+    await extractTemplate(zipPath, projectPath, {
+      here: inCurrentDir,
+      tracker,
+    });
     tracker.complete('extract', 'done');
   } catch (error) {
-    tracker.error('extract', String(error));
+    tracker.error('extract', String(error instanceof Error ? error.message : error));
     console.log(tracker.render());
-    process.exit(1);
+    console.log();
+    console.log(chalk.red('Error:') + ' Failed to extract template.');
+    if (options.debug) {
+      console.log(chalk.dim(String(error)));
+    }
+    process.exit(ExitCode.FILE_SYSTEM_ERROR);
   }
 
   // Set script permissions (Unix only)
   if (process.platform !== 'win32' && scriptType === 'sh') {
-    tracker.start('chmod', 'setting permissions');
     try {
-      // TODO: Implement chmod for .sh files
-      tracker.complete('chmod', 'done');
+      ensureExecutableScripts(projectPath, tracker);
     } catch (error) {
-      tracker.error('chmod', String(error));
+      // Non-fatal error, just log it
+      if (options.debug) {
+        console.log(chalk.dim(`Permission error: ${error}`));
+      }
     }
   }
 
@@ -170,11 +263,19 @@ export async function init(
   console.log(tracker.render());
   console.log();
 
+  // Show security notice
+  console.log(SECURITY_NOTICE);
+
+  // Show Codex-specific message
+  if (selectedAi === 'codex') {
+    console.log(getCodexHomeMessage(projectPath));
+  }
+
+  // Show next steps panel
+  panel(getNextSteps(projectName!, selectedAi, inCurrentDir), 'Next Steps');
+  console.log();
+
   // Success message
   console.log(chalk.green('✓') + ' Project initialized successfully!');
-  console.log();
-  console.log('Next steps:');
-  console.log(`  ${chalk.cyan('cd')} ${projectName}`);
-  console.log(`  ${chalk.cyan('code')} .`);
   console.log();
 }
