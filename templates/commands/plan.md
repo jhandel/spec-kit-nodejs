@@ -15,6 +15,7 @@ scripts:
 agent_scripts:
   sh: scripts/bash/update-agent-context.sh __AGENT__
   ps: scripts/powershell/update-agent-context.ps1 -AgentType __AGENT__
+  js: npx specify update-agent-context __AGENT__
 ---
 
 ## User Input

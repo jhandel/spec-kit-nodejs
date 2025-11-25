@@ -11,6 +11,7 @@ handoffs:
 scripts:
   sh: scripts/bash/create-new-feature.sh --json "{ARGS}"
   ps: scripts/powershell/create-new-feature.ps1 -Json "{ARGS}"
+  js: npx specify create-new-feature --json "{ARGS}"
 ---
 
 ## User Input

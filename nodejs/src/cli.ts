@@ -13,6 +13,8 @@ import { check } from './commands/check.js';
 import { version as versionCmd } from './commands/version.js';
 import { checkPrerequisites } from './commands/check-prerequisites.js';
 import { setupPlan } from './commands/setup-plan.js';
+import { createNewFeature } from './commands/create-new-feature.js';
+import { updateAgentContext } from './commands/update-agent-context.js';
 import { showBanner } from './lib/ui/banner.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -73,6 +75,19 @@ program
   .description('Set up the plan.md file for a feature by copying the plan template')
   .option('--json', 'Output in JSON format')
   .action(setupPlan);
+
+program
+  .command('create-new-feature <feature-description>')
+  .description('Create a new feature branch and set up the spec directory structure')
+  .option('--json', 'Output in JSON format')
+  .option('--short-name <name>', 'Custom short name (2-4 words) for the branch')
+  .option('--number <n>', 'Specify branch number manually (overrides auto-detection)')
+  .action(createNewFeature);
+
+program
+  .command('update-agent-context [agent-type]')
+  .description('Update agent context files with information from plan.md')
+  .action(updateAgentContext);
 
 // Show banner when no command provided
 if (process.argv.length <= 2) {

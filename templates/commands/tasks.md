@@ -12,6 +12,7 @@ handoffs:
 scripts:
   sh: scripts/bash/check-prerequisites.sh --json
   ps: scripts/powershell/check-prerequisites.ps1 -Json
+  js: npx specify check-prerequisites --json
 ---
 
 ## User Input

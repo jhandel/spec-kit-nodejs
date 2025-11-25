@@ -7,6 +7,7 @@ handoffs:
 scripts:
    sh: scripts/bash/check-prerequisites.sh --json --paths-only
    ps: scripts/powershell/check-prerequisites.ps1 -Json -PathsOnly
+   js: npx specify check-prerequisites --json --paths-only
 ---
 
 ## User Input
