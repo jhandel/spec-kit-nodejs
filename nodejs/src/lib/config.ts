@@ -157,7 +157,7 @@ export const BANNER = `
 /**
  * Tagline displayed under the banner
  */
-export const TAGLINE = 'GitHub Spec Kit - Spec-Driven Development Toolkit';
+export const TAGLINE = 'GitHub Spec Kit - Spec-Driven Development Toolkit JS';
 
 /**
  * List of all expected agent keys

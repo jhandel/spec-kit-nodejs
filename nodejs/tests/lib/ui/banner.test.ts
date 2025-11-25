@@ -45,7 +45,7 @@ describe('TAGLINE', () => {
   // test_tagline_exact
   it('should be exact text', () => {
     const tagline = getTagline();
-    expect(tagline).toBe('GitHub Spec Kit - Spec-Driven Development Toolkit');
+    expect(tagline).toBe('GitHub Spec Kit - Spec-Driven Development Toolkit JS');
   });
 
   it('should mention Spec Kit', () => {

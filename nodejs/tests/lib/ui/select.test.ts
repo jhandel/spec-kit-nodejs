@@ -126,9 +126,10 @@ describe('Select With Arrows Used For', () => {
 
   it('script selection uses SCRIPT_TYPE_CHOICES', () => {
     const scriptChoices = getScriptChoices();
-    expect(Object.keys(scriptChoices)).toHaveLength(2);
+    expect(Object.keys(scriptChoices)).toHaveLength(3);
     expect(scriptChoices['sh']).toBe('POSIX Shell (bash/zsh)');
     expect(scriptChoices['ps']).toBe('PowerShell');
+    expect(scriptChoices['js']).toBe('JavaScript (Node.js)');
   });
 
   it('script selection default depends on OS', () => {

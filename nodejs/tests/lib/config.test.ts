@@ -236,10 +236,11 @@ describe('AGENT_CONFIG', () => {
 
 describe('SCRIPT_TYPE_CHOICES', () => {
   // test_script_type_choices_has_two
-  it('should have exactly two script types (sh and ps)', () => {
-    expect(Object.keys(SCRIPT_TYPE_CHOICES)).toHaveLength(2);
+  it('should have exactly three script types (sh, ps, and js)', () => {
+    expect(Object.keys(SCRIPT_TYPE_CHOICES)).toHaveLength(3);
     expect(SCRIPT_TYPE_CHOICES).toHaveProperty('sh');
     expect(SCRIPT_TYPE_CHOICES).toHaveProperty('ps');
+    expect(SCRIPT_TYPE_CHOICES).toHaveProperty('js');
   });
 
   // test_sh_description_exact
