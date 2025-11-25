@@ -160,7 +160,8 @@ describe('Tracker Integration', () => {
     }
 
     const rendered = tracker.render();
-    expect(rendered).toContain('chmod');
+    // The step shows 'Set script permissions' label, not necessarily 'chmod' as key
+    expect(rendered.toLowerCase()).toContain('script permissions');
   });
 
   it('skips on Windows', () => {
@@ -185,7 +186,7 @@ describe('Tracker Integration', () => {
       ensureExecutableScripts(tempDir, tracker);
       const rendered = tracker.render();
       // Should have either skipped (Windows) or handled missing dir
-      expect(rendered).toContain('chmod');
+      expect(rendered.toLowerCase()).toContain('script');
     } finally {
       cleanupTempDir(tempDir);
     }

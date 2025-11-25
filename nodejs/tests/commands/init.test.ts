@@ -5,7 +5,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { platform } from 'node:os';
-import { AGENT_CONFIG, SCRIPT_TYPE_CHOICES } from '../../src/lib/config.js';
+import { AGENT_CONFIG } from '../../src/lib/config.js';
 
 describe('Init Command Arguments', () => {
   it('accepts optional project_name positional argument', () => {
@@ -19,11 +19,6 @@ describe('Init Command Arguments', () => {
     expect(validAgents).toHaveLength(15);
     expect(validAgents).toContain('copilot');
     expect(validAgents).toContain('claude');
-  });
-
-  it('--script option specifies script type', () => {
-    const validTypes = Object.keys(SCRIPT_TYPE_CHOICES);
-    expect(validTypes).toEqual(['sh', 'ps', 'js']);
   });
 
   it('--ignore-agent-tools flag exists', () => {
@@ -118,14 +113,14 @@ describe('Init Template Download', () => {
   });
 
   it('asset name pattern format', () => {
-    const pattern = 'spec-kit-template-{ai}-{script}-{version}.zip';
+    const pattern = 'spec-kit-template-{ai}-{version}.zip';
     expect(pattern).toContain('spec-kit-template');
     expect(pattern).toContain('.zip');
   });
 
   it('example asset name', () => {
-    const example = 'spec-kit-template-copilot-sh-0.0.22.zip';
-    expect(example).toMatch(/^spec-kit-template-\w+-\w+-[\d.]+\.zip$/);
+    const example = 'spec-kit-template-copilot-0.0.22.zip';
+    expect(example).toMatch(/^spec-kit-template-\w+-[\d.]+\.zip$/);
   });
 });
 

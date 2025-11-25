@@ -19,8 +19,6 @@ export {
 // Configuration and constants
 export {
   AGENT_CONFIG,
-  SCRIPT_TYPE_CHOICES,
-  getDefaultScriptType,
   CLAUDE_LOCAL_PATH,
   BANNER,
   TAGLINE,

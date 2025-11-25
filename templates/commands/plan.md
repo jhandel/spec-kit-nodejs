@@ -8,14 +8,8 @@ handoffs:
   - label: Create Checklist
     agent: speckit.checklist
     prompt: Create a checklist for the following domain...
-scripts:
-  sh: scripts/bash/setup-plan.sh --json
-  ps: scripts/powershell/setup-plan.ps1 -Json
-  js: npx specify setup-plan --json
-agent_scripts:
-  sh: scripts/bash/update-agent-context.sh __AGENT__
-  ps: scripts/powershell/update-agent-context.ps1 -AgentType __AGENT__
-  js: npx specify update-agent-context __AGENT__
+script: npx specify setup-plan --json
+agent_script: npx specify update-agent-context __AGENT__
 ---
 
 ## User Input

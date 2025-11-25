@@ -10,13 +10,12 @@ import chalk from 'chalk';
 import { showBanner } from '../lib/ui/banner.js';
 import { StepTracker } from '../lib/ui/tracker.js';
 import { panel } from '../lib/ui/console.js';
-import { selectWithArrows, getAIChoices, getScriptChoices, DEFAULT_AI_KEY, getDefaultScriptKey } from '../lib/ui/select.js';
-import { AGENT_CONFIG, SCRIPT_TYPE_CHOICES, getDefaultScriptType } from '../lib/config.js';
+import { selectWithArrows, getAIChoices, DEFAULT_AI_KEY } from '../lib/ui/select.js';
+import { AGENT_CONFIG } from '../lib/config.js';
 import { checkTool } from '../lib/tools/detect.js';
 import { initGitRepo, isGitRepo } from '../lib/tools/git.js';
 import { downloadTemplate } from '../lib/template/download.js';
 import { extractTemplate } from '../lib/template/extract.js';
-import { ensureExecutableScripts } from '../lib/template/permissions.js';
 import { ExitCode } from '../lib/errors.js';
 import type { InitOptions } from '../types/index.js';
 
@@ -168,46 +167,11 @@ export async function init(
     }
   }
 
-  // Determine script type
-  let scriptType: string = options.script || '';
-  if (!scriptType) {
-    // Interactive selection if TTY is available
-    if (process.stdin.isTTY && process.stdout.isTTY) {
-      try {
-        console.log();
-        scriptType = await selectWithArrows(
-          getScriptChoices(),
-          'Select script type:',
-          getDefaultScriptKey()
-        );
-      } catch (error) {
-        if (error instanceof Error && error.message.includes('KeyboardInterrupt')) {
-          console.log('\n' + chalk.yellow('Selection cancelled.'));
-          process.exit(ExitCode.USER_CANCELLED);
-        }
-        throw error;
-      }
-    } else {
-      // Non-interactive: default based on OS
-      scriptType = getDefaultScriptType();
-    }
-  }
-
-  // Validate script type
-  if (!SCRIPT_TYPE_CHOICES[scriptType]) {
-    console.log(chalk.red('Error:') + ` Unknown script type '${scriptType}'.`);
-    console.log('Valid options: ' + Object.keys(SCRIPT_TYPE_CHOICES).join(', '));
-    process.exit(ExitCode.INVALID_ARGUMENT);
-  }
-
   // Initialize step tracker
   const tracker = new StepTracker(`Initialize ${projectName}`);
 
   tracker.add('download', 'Download template');
   tracker.add('extract', 'Extract files');
-  if (process.platform !== 'win32' && scriptType === 'sh') {
-    tracker.add('chmod', 'Set script permissions');
-  }
   if (!options.noGit) {
     tracker.add('git', 'Initialize git repository');
   }
@@ -217,7 +181,6 @@ export async function init(
   console.log(`  Name: ${chalk.green(projectName)}`);
   console.log(`  Path: ${chalk.green(projectPath)}`);
   console.log(`  AI Assistant: ${chalk.green(agentConfig.name)}`);
-  console.log(`  Script Type: ${chalk.green(SCRIPT_TYPE_CHOICES[scriptType])}`);
   console.log();
 
   // Download template
@@ -229,7 +192,7 @@ export async function init(
       mkdirSync(tempDir, { recursive: true });
     }
     
-    const result = await downloadTemplate(selectedAi, scriptType, tempDir, {
+    const result = await downloadTemplate(selectedAi, tempDir, {
       githubToken: options.githubToken,
       debug: options.debug,
     });
@@ -272,18 +235,6 @@ export async function init(
       console.log(chalk.dim(String(error)));
     }
     process.exit(ExitCode.FILE_SYSTEM_ERROR);
-  }
-
-  // Set script permissions (Unix only)
-  if (process.platform !== 'win32' && scriptType === 'sh') {
-    try {
-      ensureExecutableScripts(projectPath, tracker);
-    } catch (error) {
-      // Non-fatal error, just log it
-      if (options.debug) {
-        console.log(chalk.dim(`Permission error: ${error}`));
-      }
-    }
   }
 
   // Initialize git repository

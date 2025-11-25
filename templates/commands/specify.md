@@ -8,10 +8,7 @@ handoffs:
     agent: speckit.clarify
     prompt: Clarify specification requirements
     send: true
-scripts:
-  sh: scripts/bash/create-new-feature.sh --json "{ARGS}"
-  ps: scripts/powershell/create-new-feature.ps1 -Json "{ARGS}"
-  js: npx specify create-new-feature --json "{ARGS}"
+script: npx specify create-new-feature --json "{ARGS}"
 ---
 
 ## User Input
@@ -59,8 +56,7 @@ Given that feature description, do this:
    
    d. Run the script `{SCRIPT}` with the calculated number and short-name:
       - Pass `--number N+1` and `--short-name "your-short-name"` along with the feature description
-      - Bash example: `{SCRIPT} --json --number 5 --short-name "user-auth" "Add user authentication"`
-      - PowerShell example: `{SCRIPT} -Json -Number 5 -ShortName "user-auth" "Add user authentication"`
+      - Example: `npx specify create-new-feature --json --number 5 --short-name "user-auth" "Add user authentication"`
    
    **IMPORTANT**:
    - Check all three sources (remote branches, local branches, specs directories) to find the highest number
