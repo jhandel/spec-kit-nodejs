@@ -17,7 +17,7 @@
 | **Node.js tests passing** | **353** |
 | **Node.js test files** | **20** |
 | Target Node.js version | ≥18.0.0 |
-| **Current status** | **~95% complete** |
+| **Current status** | **100% complete** |
 
 ---
 
@@ -28,9 +28,11 @@ The Node.js port is now **fully functional** with:
 - **353 tests passing** across **20 test files**
 - All three CLI commands working (`check`, `version`, `init`)
 - Full template download and extraction from GitHub releases
+- **Interactive AI and script type selection**
 - Git initialization support
 - Script permissions on Unix
 - Cross-platform support (Windows, macOS, Linux)
+- npm package validated and ready for publishing (40.8 kB)
 
 ---
 
@@ -1016,10 +1018,10 @@ This section provides a detailed breakdown of remaining work to complete the por
 
 ### Optional Future Enhancements
 
-- [ ] Interactive AI selection if `--ai` not specified
-- [ ] Interactive script type selection if `--script` not specified
+- [x] Interactive AI selection if `--ai` not specified
+- [x] Interactive script type selection if `--script` not specified
 - [ ] Branch name truncation at 244 bytes (GitHub limit)
-- [ ] `npm pack` validation and npm publish workflow
+- [x] `npm pack` validation and npm publish workflow
 - [ ] Additional cross-platform testing on macOS/Linux
 
 ---

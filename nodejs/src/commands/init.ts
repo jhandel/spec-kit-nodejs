@@ -10,6 +10,7 @@ import chalk from 'chalk';
 import { showBanner } from '../lib/ui/banner.js';
 import { StepTracker } from '../lib/ui/tracker.js';
 import { panel } from '../lib/ui/console.js';
+import { selectWithArrows, getAIChoices, getScriptChoices, DEFAULT_AI_KEY, getDefaultScriptKey } from '../lib/ui/select.js';
 import { AGENT_CONFIG, SCRIPT_TYPE_CHOICES, getDefaultScriptType } from '../lib/config.js';
 import { checkTool } from '../lib/tools/detect.js';
 import { initGitRepo, isGitRepo } from '../lib/tools/git.js';
@@ -123,9 +124,27 @@ export async function init(
   // Determine AI assistant
   let selectedAi = options.ai;
   if (!selectedAi) {
-    // Default to copilot (in full implementation, this would be interactive)
-    selectedAi = 'copilot';
-    console.log(chalk.cyan('Note:') + ' Defaulting to copilot. Use --ai <name> to specify an AI assistant.');
+    // Interactive selection if TTY is available
+    if (process.stdin.isTTY && process.stdout.isTTY) {
+      try {
+        console.log();
+        selectedAi = await selectWithArrows(
+          getAIChoices(),
+          'Select AI assistant:',
+          DEFAULT_AI_KEY
+        );
+      } catch (error) {
+        if (error instanceof Error && error.message.includes('KeyboardInterrupt')) {
+          console.log('\n' + chalk.yellow('Selection cancelled.'));
+          process.exit(ExitCode.USER_CANCELLED);
+        }
+        throw error;
+      }
+    } else {
+      // Non-interactive: default to copilot
+      selectedAi = 'copilot';
+      console.log(chalk.cyan('Note:') + ' Defaulting to copilot. Use --ai <name> to specify an AI assistant.');
+    }
   }
 
   // Validate AI assistant
@@ -150,7 +169,29 @@ export async function init(
   }
 
   // Determine script type
-  const scriptType: string = options.script || getDefaultScriptType();
+  let scriptType: string = options.script || '';
+  if (!scriptType) {
+    // Interactive selection if TTY is available
+    if (process.stdin.isTTY && process.stdout.isTTY) {
+      try {
+        console.log();
+        scriptType = await selectWithArrows(
+          getScriptChoices(),
+          'Select script type:',
+          getDefaultScriptKey()
+        );
+      } catch (error) {
+        if (error instanceof Error && error.message.includes('KeyboardInterrupt')) {
+          console.log('\n' + chalk.yellow('Selection cancelled.'));
+          process.exit(ExitCode.USER_CANCELLED);
+        }
+        throw error;
+      }
+    } else {
+      // Non-interactive: default based on OS
+      scriptType = getDefaultScriptType();
+    }
+  }
 
   // Validate script type
   if (!SCRIPT_TYPE_CHOICES[scriptType]) {

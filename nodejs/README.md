@@ -8,7 +8,7 @@ The original Python implementation is in `../src/specify_cli/`. This port provid
 
 ## Current Status
 
-**353 tests passing** across 20 test files. **~95% complete**
+**353 tests passing** across 20 test files. **100% complete** ✅
 
 ### Implemented Features
 
@@ -21,6 +21,7 @@ The original Python implementation is in `../src/specify_cli/`. This port provid
 - ✅ **CLI Commands**: `check`, `version`, `init` (fully functional)
 - ✅ **Script Permissions**: Set chmod on Unix .sh files
 - ✅ **Error Handling**: Structured error classes with exit codes
+- ✅ **Interactive Selection**: Arrow key navigation for AI and script type
 
 ### Fully Working Commands
 
