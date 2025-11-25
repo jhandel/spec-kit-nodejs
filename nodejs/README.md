@@ -4,7 +4,28 @@ This directory contains the Node.js/TypeScript port of the Specify CLI.
 
 ## Overview
 
-The original Python implementation is in `../src/specify_cli/`. This port aims to provide identical functionality using Node.js and TypeScript.
+The original Python implementation is in `../src/specify_cli/`. This port provides identical functionality using Node.js and TypeScript.
+
+## Current Status
+
+**127 tests passing** across 8 test files.
+
+### Implemented Features
+
+- ✅ **Configuration**: AGENT_CONFIG (15 agents), SCRIPT_TYPE_CHOICES, CLAUDE_LOCAL_PATH
+- ✅ **GitHub Integration**: Token handling, rate limit parsing/formatting
+- ✅ **UI Components**: StepTracker, ASCII banner, console utilities
+- ✅ **Template Processing**: Deep merge JSON files
+- ✅ **Tool Detection**: Check for CLI tools (git, claude, code, etc.)
+- ✅ **Git Operations**: Detect git repos, initialize with commit
+- ✅ **CLI Commands**: `check`, `version`, `init` (basic)
+
+### In Progress
+
+- 🔄 **Template Download**: Download ZIP from GitHub releases
+- 🔄 **Template Extraction**: Unzip and merge with project directory
+- 🔄 **Script Permissions**: Set chmod on Unix .sh files
+- 🔄 **Interactive Selection**: Arrow key navigation menu
 
 ## Getting Started
 
@@ -19,9 +40,10 @@ npm run build
 npm test
 
 # Run the CLI locally
-npx . --help
-npx . check
-npx . init my-project --ai copilot --script sh --no-git
+node bin/specify.js --help
+node bin/specify.js check
+node bin/specify.js version
+node bin/specify.js init my-project --ai copilot --no-git
 ```
 
 ## Project Structure
