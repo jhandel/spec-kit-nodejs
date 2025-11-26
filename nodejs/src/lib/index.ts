@@ -1,5 +1,5 @@
 /**
- * Library exports for Specify CLI
+ * Library exports for Speckit CLI
  *
  * This barrel file provides a single import point for all shared utilities.
  */
@@ -30,3 +30,17 @@ export {
 
 // Error handling
 export * from './errors.js';
+
+// Template generation
+export {
+  generateTemplates,
+  generateCommand,
+  parseFrontmatter,
+  rewritePaths,
+  getTemplatesDir,
+  getMemoryDir,
+  AGENT_OUTPUT_CONFIG,
+  type AgentOutputConfig,
+  type GenerateOptions,
+  type GenerateResult,
+} from './template/generator.js';

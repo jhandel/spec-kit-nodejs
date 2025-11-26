@@ -150,9 +150,9 @@ describe('Init Git Initialization', () => {
 });
 
 describe('Init Script Permissions', () => {
-  it('sh scripts in .specify/scripts made executable', () => {
-    const scriptsPath = '.specify/scripts';
-    expect(scriptsPath).toContain('.specify');
+  it('sh scripts in .speckit/scripts made executable', () => {
+    const scriptsPath = '.speckit/scripts';
+    expect(scriptsPath).toContain('.speckit');
     expect(scriptsPath).toContain('scripts');
   });
 
@@ -216,7 +216,7 @@ describe('Init Next Steps Content', () => {
   it('shows slash commands in order', () => {
     const commands = [
       '/speckit.constitution',
-      '/speckit.specify',
+      '/speckit.speckit',
       '/speckit.plan',
       '/speckit.tasks',
       '/speckit.implement',

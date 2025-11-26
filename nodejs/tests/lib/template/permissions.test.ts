@@ -39,8 +39,8 @@ describe('Script Permission Basic Behavior', () => {
 
   it('targets specify scripts directory', () => {
     const projectPath = '/some/project';
-    const expectedPath = join(projectPath, '.specify', 'scripts');
-    expect(expectedPath).toContain('.specify');
+    const expectedPath = join(projectPath, '.speckit', 'scripts');
+    expect(expectedPath).toContain('.speckit');
     expect(expectedPath).toContain('scripts');
   });
 });
@@ -182,7 +182,7 @@ describe('Tracker Integration', () => {
     const tracker = new StepTracker('Test');
     const tempDir = createTempDir();
     try {
-      // Don't create .specify/scripts directory
+      // Don't create .speckit/scripts directory
       ensureExecutableScripts(tempDir, tracker);
       const rendered = tracker.render();
       // Should have either skipped (Windows) or handled missing dir
@@ -202,8 +202,8 @@ describe('Complete Flow (Unix only)', () => {
 
     const tempDir = createTempDir();
     try {
-      // Create .specify/scripts structure
-      const scriptsDir = join(tempDir, '.specify', 'scripts');
+      // Create .speckit/scripts structure
+      const scriptsDir = join(tempDir, '.speckit', 'scripts');
       mkdirSync(scriptsDir, { recursive: true });
 
       const scriptPath = join(scriptsDir, 'test.sh');

@@ -1,11 +1,10 @@
 /**
- * Init command - initialize a new Specify project
+ * Init command - initialize a new Speckit project
  * Ported from Python specify_cli/__init__.py
  */
 
-import { existsSync, readdirSync, mkdirSync, writeFileSync } from 'fs';
-import { join, resolve, basename } from 'path';
-import { tmpdir } from 'os';
+import { existsSync, readdirSync, mkdirSync } from 'fs';
+import { resolve, basename } from 'path';
 import chalk from 'chalk';
 import { showBanner } from '../lib/ui/banner.js';
 import { StepTracker } from '../lib/ui/tracker.js';
@@ -14,8 +13,7 @@ import { selectWithArrows, getAIChoices, DEFAULT_AI_KEY } from '../lib/ui/select
 import { AGENT_CONFIG } from '../lib/config.js';
 import { checkTool } from '../lib/tools/detect.js';
 import { initGitRepo, isGitRepo } from '../lib/tools/git.js';
-import { downloadTemplate } from '../lib/template/download.js';
-import { extractTemplate } from '../lib/template/extract.js';
+import { generateTemplates } from '../lib/template/generator.js';
 import { ExitCode } from '../lib/errors.js';
 import type { InitOptions } from '../types/index.js';
 
@@ -170,8 +168,7 @@ export async function init(
   // Initialize step tracker
   const tracker = new StepTracker(`Initialize ${projectName}`);
 
-  tracker.add('download', 'Download template');
-  tracker.add('extract', 'Extract files');
+  tracker.add('generate', 'Generate templates');
   if (!options.noGit) {
     tracker.add('git', 'Initialize git repository');
   }
@@ -183,54 +180,20 @@ export async function init(
   console.log(`  AI Assistant: ${chalk.green(agentConfig.name)}`);
   console.log();
 
-  // Download template
-  tracker.start('download', 'fetching from GitHub');
-  let zipPath: string;
+  // Generate templates locally
+  tracker.start('generate', 'generating templates');
   try {
-    const tempDir = join(tmpdir(), 'speckit-cli');
-    if (!existsSync(tempDir)) {
-      mkdirSync(tempDir, { recursive: true });
-    }
-    
-    const result = await downloadTemplate(selectedAi, tempDir, {
-      githubToken: options.githubToken,
-      debug: options.debug,
-    });
-    zipPath = result.zipPath;
-    
-    // Actually write the ZIP file if the download returned a response
-    // The downloadTemplate function may need adjustment to actually write the file
-    
-    tracker.complete('download', `v${result.metadata.release}`);
-  } catch (error) {
-    tracker.error('download', String(error instanceof Error ? error.message : error));
-    console.log(tracker.render());
-    console.log();
-    console.log(chalk.red('Error:') + ' Failed to download template from GitHub.');
-    if (options.debug) {
-      console.log(chalk.dim(String(error)));
-    }
-    console.log('');
-    console.log('Troubleshooting:');
-    console.log('  • Check your internet connection');
-    console.log('  • Use --github-token <token> for higher rate limits');
-    console.log('  • Set GH_TOKEN or GITHUB_TOKEN environment variable');
-    process.exit(ExitCode.NETWORK_ERROR);
-  }
-
-  // Extract files
-  tracker.start('extract', 'extracting to project');
-  try {
-    await extractTemplate(zipPath, projectPath, {
-      here: inCurrentDir,
+    const result = await generateTemplates(selectedAi, projectPath, {
       tracker,
+      verbose: options.debug,
     });
-    tracker.complete('extract', 'done');
+    
+    tracker.complete('generate', `${result.filesGenerated} files created`);
   } catch (error) {
-    tracker.error('extract', String(error instanceof Error ? error.message : error));
+    tracker.error('generate', String(error instanceof Error ? error.message : error));
     console.log(tracker.render());
     console.log();
-    console.log(chalk.red('Error:') + ' Failed to extract template.');
+    console.log(chalk.red('Error:') + ' Failed to generate templates.');
     if (options.debug) {
       console.log(chalk.dim(String(error)));
     }

@@ -8,6 +8,11 @@
   "bin": {
     "speckit": "./bin/speckit.js"
   },
+  "files": [
+    "dist",
+    "bin",
+    "assets"
+  ],
   "engines": {
     "node": ">=18.0.0"
   },
