@@ -110,7 +110,7 @@ export async function fetchLatestRelease(options?: {
   const response = await fetch(API_URL, {
     headers: {
       Accept: 'application/vnd.github+json',
-      'User-Agent': 'specify-cli',
+      'User-Agent': 'speckit-cli',
       ...headers,
     },
   });
@@ -161,7 +161,7 @@ export async function downloadTemplate(
   const response = await fetch(asset.browser_download_url, {
     headers: {
       Accept: 'application/octet-stream',
-      'User-Agent': 'specify-cli',
+      'User-Agent': 'speckit-cli',
       ...headers,
     },
   });

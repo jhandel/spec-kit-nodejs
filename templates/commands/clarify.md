@@ -4,7 +4,7 @@ handoffs:
   - label: Build Technical Plan
     agent: speckit.plan
     prompt: Create a plan for the spec. I am building with...
-script: npx specify check-prerequisites --json --paths-only
+script: npx speckit check-prerequisites --json --paths-only
 ---
 
 ## User Input

@@ -1,6 +1,6 @@
 ---
 description: Execute the implementation plan by processing and executing all tasks defined in tasks.md
-script: npx specify check-prerequisites --json --require-tasks --include-tasks
+script: npx speckit check-prerequisites --json --require-tasks --include-tasks
 ---
 
 ## User Input

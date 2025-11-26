@@ -1,7 +1,7 @@
 ---
 description: Convert existing tasks into actionable, dependency-ordered GitHub issues for the feature based on available design artifacts.
 tools: ['github/github-mcp-server/issue_write']
-script: npx specify check-prerequisites --json --require-tasks --include-tasks
+script: npx speckit check-prerequisites --json --require-tasks --include-tasks
 ---
 
 ## User Input

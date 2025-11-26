@@ -100,8 +100,8 @@ export async function init(
   } else {
     console.log(chalk.red('Error:') + ' Please provide a project name or use --here');
     console.log('');
-    console.log('Usage: specify init <project-name>');
-    console.log('       specify init --here');
+    console.log('Usage: speckit init <project-name>');
+    console.log('       speckit init --here');
     process.exit(ExitCode.INVALID_ARGUMENT);
   }
 
@@ -187,7 +187,7 @@ export async function init(
   tracker.start('download', 'fetching from GitHub');
   let zipPath: string;
   try {
-    const tempDir = join(tmpdir(), 'specify-cli');
+    const tempDir = join(tmpdir(), 'speckit-cli');
     if (!existsSync(tempDir)) {
       mkdirSync(tempDir, { recursive: true });
     }

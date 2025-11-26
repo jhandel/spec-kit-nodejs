@@ -1,6 +1,6 @@
 ---
 description: Generate a custom checklist for the current feature based on user requirements.
-script: npx specify check-prerequisites --json
+script: npx speckit check-prerequisites --json
 ---
 
 ## Checklist Purpose: "Unit Tests for English"
